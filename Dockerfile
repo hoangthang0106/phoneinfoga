@@ -20,6 +20,6 @@ RUN make build
 
 FROM alpine:3.18
 COPY --from=go_builder /app/bin/phoneinfoga /app/phoneinfoga
-EXPOSE 5000
+EXPOSE 18897
 ENTRYPOINT ["/app/phoneinfoga"]
 CMD ["--help"]
