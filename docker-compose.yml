@@ -1,0 +1,30 @@
+# IT-MANAGER: Default Docker Compose for mobile Portainer. Port bindings follow the 1889x sequence.
+# Use LAN_IP, OSINT_AUTH_USER, OSINT_AUTH_PASSWORD entered in Portainer; verify port before deployment.
+# PhoneInfoga; Portainer LAN Stack; fork: https://github.com/hoangthang0106/phoneinfoga
+# Dedicated OSINT host range 29001-29099; host port is only a CANDIDATE. Confirm on actual VM/LXC before deployment.
+services:
+  phoneinfoga:
+    image: sundowndev/phoneinfoga:latest
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    command: ["serve", "--port", "18897"]
+  gateway:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - phoneinfoga
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "${LAN_IP:?ENTER_LAN_IP}:${PHONEINFOGA_HOST_PORT:-18897}:18897/tcp"
+    environment:
+      AUTH_USER: "${OSINT_AUTH_USER:?ENTER_USERNAME}"
+      AUTH_PASSWORD: "${OSINT_AUTH_PASSWORD:?ENTER_PASSWORD_IN_PORTAINER}"
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        HASH=$$(caddy hash-password --algorithm bcrypt --plaintext "$$AUTH_PASSWORD")
+        printf '%s\n' ':18897 {' '  basic_auth {' "    $$AUTH_USER $$HASH" '  }' '  reverse_proxy phoneinfoga:18897' '}' > /etc/caddy/Caddyfile
+        caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+        exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
