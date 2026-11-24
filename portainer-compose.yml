@@ -1,5 +1,5 @@
 # PhoneInfoga; Portainer LAN Stack; fork: https://github.com/hoangthang0106/phoneinfoga
-# Dedicated OSINT host range 29001-29099; host port is only a CANDIDATE. Confirm on actual VM/LXC before deployment.
+# Sequential 1889x OSINT LAN ports; availability is not verified until checked on Docker VM/LXC.
 services:
   phoneinfoga:
     image: sundowndev/phoneinfoga:latest
