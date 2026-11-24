@@ -6,7 +6,7 @@ services:
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
-    command: ["serve"]
+    command: ["serve", "--port", "18897"]
   gateway:
     image: caddy:2
     restart: unless-stopped
@@ -15,7 +15,7 @@ services:
     security_opt:
       - no-new-privileges:true
     ports:
-      - "${LAN_IP:?ENTER_LAN_IP}:${PHONEINFOGA_HOST_PORT:-29004}:80/tcp"
+      - "${LAN_IP:?ENTER_LAN_IP}:${PHONEINFOGA_HOST_PORT:-18897}:18897/tcp"
     environment:
       AUTH_USER: "${OSINT_AUTH_USER:?ENTER_USERNAME}"
       AUTH_PASSWORD: "${OSINT_AUTH_PASSWORD:?ENTER_PASSWORD_IN_PORTAINER}"
@@ -23,6 +23,6 @@ services:
     command:
       - |
         HASH=$$(caddy hash-password --algorithm bcrypt --plaintext "$$AUTH_PASSWORD")
-        printf '%s\n' ':80 {' '  basic_auth {' "    $$AUTH_USER $$HASH" '  }' '  reverse_proxy phoneinfoga:5000' '}' > /etc/caddy/Caddyfile
+        printf '%s\n' ':18897 {' '  basic_auth {' "    $$AUTH_USER $$HASH" '  }' '  reverse_proxy phoneinfoga:18897' '}' > /etc/caddy/Caddyfile
         caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
         exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
