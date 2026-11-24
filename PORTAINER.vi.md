@@ -20,7 +20,7 @@ Dùng fork [hoangthang0106/phoneinfoga](https://github.com/hoangthang0106/phonei
 
 1. Chrome → Portainer → **Environments → Containers/Stacks**, chọn đúng Docker endpoint. Kiểm tra chưa có Stack này.
 2. Vào **Stacks → Add stack → Repository**, nhập các giá trị Git bên dưới.
-3. Kéo xuống **Environment variables** → **Add an environment variable** từng dòng. Nhập `LAN_IP`, `OSINT_AUTH_USER`, `OSINT_AUTH_HASH` (là bcrypt hash, không phải mật khẩu thuần).
+3. Kéo xuống **Environment variables** → **Add an environment variable** từng dòng. Nhập `LAN_IP`, `OSINT_AUTH_USER`, `OSINT_AUTH_PASSWORD` (mật khẩu tự đặt, không phải hash).
 4. Kiểm tra host port 29004 không bị chiếm (cả container dừng). Sau đó mới **Deploy the stack**.
 5. Mở **Containers → Logs** của gateway và ứng dụng. Nếu cả hai chạy bình thường, mở địa chỉ LAN trên điện thoại rồi đăng nhập bằng **mật khẩu gốc**.
 6. Nếu build lỗi, xem phương án `portainer-image-only.yml` ở bên dưới; **không đổi cổng ngẫu nhiên để chữa lỗi build**.
@@ -38,10 +38,9 @@ docker ps -aq | xargs -r docker inspect --format '{{.Name}} {{json .HostConfig.P
 
 Không coi port trống nếu chưa xem listener và port được đặt cho container đang dừng. Nếu 29004 trùng, đặt `PHONEINFOGA_HOST_PORT` thành cổng TCP khác đã xác minh trống. Không dừng/xóa container cũ.
 
-## 2. Tạo mật khẩu đã băm bằng Caddy
+## 2. Tự đặt mật khẩu trong Portainer — không cần tạo hash
 
-Trên Docker host, người quản trị **chủ động chạy** `docker run --rm -it caddy:2 caddy hash-password --algorithm bcrypt` và nhập mật khẩu khi chương trình hỏi (không ghi mật khẩu trong lệnh hoặc Git).
-Sao chép chuỗi bcrypt (`$2a$` hoặc `$2b$`) để nhập vào Portainer. **OSINT_AUTH_HASH là hash, không phải mật khẩu thuần.**
+Trong Portainer → **Environment variables**, đặt `OSINT_AUTH_PASSWORD` là mật khẩu mạnh do bạn tự chọn. Container gateway **tự tạo mật khẩu tự nhập khi khởi động**; bạn không phải chạy `caddy hash-password` hay dán `OSINT_AUTH_PASSWORD`. Không nhập mật khẩu vào file GitHub hoặc nhắn qua chat. Người có quyền quản trị Portainer/Docker vẫn có thể xem biến môi trường. Dùng HTTPS nội bộ/VPN khi xử lý dữ liệu nhạy cảm, vì HTTP Basic Auth không mã hóa.
 
 ## 3. Portainer → Stacks → Add stack → Repository
 
@@ -52,7 +51,7 @@ Sao chép chuỗi bcrypt (`$2a$` hoặc `$2b$`) để nhập vào Portainer. **O
 - **Environment variables** (nhập tay trước Deploy):
   - `LAN_IP`: IP thật trên interface của VM/LXC đang chạy Docker, không mặc định dùng IP Proxmox host.
   - `OSINT_AUTH_USER`: username dùng để mở web UI (ví dụ `itadmin`).
-  - `OSINT_AUTH_HASH`: chuỗi bcrypt vừa tạo.
+  - `OSINT_AUTH_PASSWORD`: mật khẩu mạnh bạn tự đặt.
   - `PHONEINFOGA_HOST_PORT`: **tùy chọn**, chỉ nhập nếu cần đổi host port 29004.
 
 **Sử dụng image dựng sẵn** `sundowndev/phoneinfoga:latest` thay vì build. Compose vẫn lưu trong fork của bạn; image không được build từ fork.
