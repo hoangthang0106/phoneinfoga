@@ -1,5 +1,5 @@
 # PhoneInfoga; Portainer LAN Stack; fork: https://github.com/hoangthang0106/phoneinfoga
-# Host 18997/tcp is a CANDIDATE only. Confirm on actual VM/LXC before deployment.
+# Dedicated OSINT host range 29001-29099; host port is only a CANDIDATE. Confirm on actual VM/LXC before deployment.
 services:
   phoneinfoga:
     image: sundowndev/phoneinfoga:latest
@@ -7,8 +7,6 @@ services:
     security_opt:
       - no-new-privileges:true
     command: ["serve"]
-    expose:
-      - "5000"
   gateway:
     image: caddy:2
     restart: unless-stopped
@@ -17,7 +15,7 @@ services:
     security_opt:
       - no-new-privileges:true
     ports:
-      - "${LAN_IP:?ENTER_LAN_IP}:${PHONEINFOGA_HOST_PORT:-18997}:80/tcp"
+      - "${LAN_IP:?ENTER_LAN_IP}:${PHONEINFOGA_HOST_PORT:-29004}:80/tcp"
     environment:
       AUTH_USER: "${OSINT_AUTH_USER:?ENTER_USERNAME}"
       AUTH_HASH: "${OSINT_AUTH_HASH:?ENTER_BCRYPT_HASH}"
